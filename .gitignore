@@ -137,3 +137,10 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# 忽略根目录的 files.json 和 users.json
+/files.json
+/users.json
+
+# 忽略根目录的 upload 文件夹
+/upload/
