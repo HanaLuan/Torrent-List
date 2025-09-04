@@ -1,0 +1,22 @@
+{
+  "name": "torrent-web",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^2.2.0",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0",
+    "multer": "^2.0.2",
+    "parse-torrent": "^9.1.5",
+    "pretty-bytes": "^7.0.1"
+  }
+}

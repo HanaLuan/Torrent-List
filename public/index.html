@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>Torrent 种子库</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <!-- 左侧上传区域 -->
+  <div class="left">
+    <h2>上传文件（.torrent）</h2>
+    <form id="uploadForm">
+			<label for="arquivo">Choose a file:</label>
+			<input accept=".torrent" class="inpdddut" name="arquivo" id="arquivo" type="file">
+			<input value="上传" type="submit" class="inpdddut">
+		</form>
+    <div id="progressContainer">
+      <div id="progressBar"></div>
+    </div>
+    <p id="status"></p>
+
+    <div id="authButtons">
+      <button id="loginBtn">登录</button>
+      <button id="registerBtn">注册</button>
+      <span id="usernameDisplay"></span>
+      <button id="logoutBtn" style="display:none;">登出</button>
+    </div>
+  </div>
+
+   <!-- 右侧文件列表 -->
+  <div class="right">
+    <h2>已上传文件(可以按文件名或上传者搜索哦~)</h2>
+    <!-- 搜索框 -->
+    <div class="form-control">
+      <input type="text" id="searchInput" required>
+      <label>
+          <span style="transition-delay:0ms">搜</span>
+          <span style="transition-delay:50ms">索</span>
+          <span style="transition-delay:100ms">文</span>
+          <span style="transition-delay:150ms">件</span>
+      </label>
+    </div>
+
+    <ul id="fileList"></ul>
+  </div>
+</div>
+
+<!-- 登录/注册弹窗 -->
+<div id="authModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h3 id="modalTitle">登录</h3>
+    <form id="authForm">
+      <input type="text" name="username" placeholder="用户名" required>
+      <input type="password" name="password" placeholder="密码" required>
+      <button type="submit" id="authSubmit">确定</button>
+    </form>
+    <p id="authMsg"></p>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

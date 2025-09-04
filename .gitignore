@@ -142,5 +142,5 @@ vite.config.ts.timestamp-*
 /files.json
 /users.json
 
-# 忽略根目录的 upload 文件夹
-/upload/
+# 忽略根目录的 uploads 文件夹
+/uploads/
