@@ -72,6 +72,9 @@ const upload = multer({
         const ext = path.extname(file.originalname).toLowerCase();
         if (allowedExtensions.includes(ext)) cb(null, true);
         else cb(new Error(`不允许的文件类型: ${ext}`));
+    },
+    limits: {
+        fileSize: 50 * 1024 * 1024 // 50MB in bytes
     }
 });
 
