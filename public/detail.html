@@ -1,17 +1,41 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<meta charset="UTF-8">
-<title>种子详情</title>
-<link rel="stylesheet" href="detail.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>种子详情</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <div class="button">
-      <h2><a href="index.html">← 返回首页</a></h2>
+  <div class="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="navbar-brand">Torrent 种子库</a>
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a href="index.html" class="nav-link">首页</a>
+        </li>
+        <li class="nav-item">
+          <a href="login.html" class="nav-link" id="loginLink">登录</a>
+        </li>
+        <li class="nav-item">
+          <a href="register.html" class="nav-link" id="registerLink">注册</a>
+        </li>
+        <li class="nav-item" id="userSection" style="display: none;">
+          <span id="usernameDisplay"></span>
+          <button id="logoutBtn" class="btn btn-secondary" style="margin-left: 10px; padding: 5px 10px;">登出</button>
+        </li>
+      </ul>
     </div>
-    <div class="info">
-      <h2>种子详情</h2>
+  </div>
+
+  <div class="container">
+    <a href="index.html" class="back-link">← 返回首页</a>
+    
+    <div class="card">
+      <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>种子详情</h2>
+        <button id="downloadBtn" class="btn">下载种子文件</button>
+      </div>
       <div id="fileDetail">加载中...</div>
     </div>
   </div>

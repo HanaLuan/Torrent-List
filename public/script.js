@@ -233,3 +233,222 @@ document.addEventListener("DOMContentLoaded", () => {
         searchInput.addEventListener("input", loadFiles);
     }
 });
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', function() {
+    checkLoginStatus();
+    loadFileList();
+    setupEventListeners();
+});
+
+// 检查登录状态
+async function checkLoginStatus() {
+    try {
+        // 这里我们模拟检查cookie
+        const username = getCookie('username');
+        const role = getCookie('role');
+        
+        if (username) {
+            document.getElementById('userSection').style.display = 'flex';
+            document.getElementById('usernameDisplay').textContent = `欢迎, ${username}${role === 'admin' ? ' (管理员)' : ''}`;
+            document.getElementById('loginLink').style.display = 'none';
+            document.getElementById('registerLink').style.display = 'none';
+        } else {
+            document.getElementById('userSection').style.display = 'none';
+            document.getElementById('loginLink').style.display = 'block';
+            document.getElementById('registerLink').style.display = 'block';
+        }
+    } catch (error) {
+        console.error('检查登录状态时出错:', error);
+    }
+}
+
+// 获取cookie值
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+// 设置事件监听器
+function setupEventListeners() {
+    // 上传表单提交
+    document.getElementById('uploadForm').addEventListener('submit', handleFileUpload);
+    
+    // 登出按钮
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+    }
+    
+    // 搜索框
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        filterFileList(e.target.value);
+    });
+}
+
+// 处理文件上传
+async function handleFileUpload(e) {
+    e.preventDefault();
+    
+    const fileInput = document.getElementById('arquivo');
+    const statusEl = document.getElementById('status');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    
+    if (!fileInput.files.length) {
+        statusEl.innerHTML = '<div class="alert alert-error">请选择一个文件</div>';
+        return;
+    }
+    
+    const file = fileInput.files[0];
+    if (!file.name.endsWith('.torrent')) {
+        statusEl.innerHTML = '<div class="alert alert-error">只允许上传 .torrent 文件</div>';
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('arquivo', file);
+    
+    try {
+        progressContainer.style.display = 'block';
+        statusEl.innerHTML = '<div class="alert alert-success">正在上传...</div>';
+        
+        const response = await fetch('/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            progressBar.style.width = '100%';
+            statusEl.innerHTML = '<div class="alert alert-success">文件上传成功</div>';
+            fileInput.value = '';
+            loadFileList();
+            
+            // 2秒后隐藏进度条
+            setTimeout(() => {
+                progressContainer.style.display = 'none';
+                progressBar.style.width = '0%';
+            }, 2000);
+        } else {
+            statusEl.innerHTML = `<div class="alert alert-error">上传失败: ${data.message}</div>`;
+            progressContainer.style.display = 'none';
+        }
+    } catch (error) {
+        statusEl.innerHTML = '<div class="alert alert-error">上传过程中发生错误</div>';
+        progressContainer.style.display = 'none';
+        console.error('上传错误:', error);
+    }
+}
+
+// 处理登出
+async function handleLogout() {
+    try {
+        await fetch('/logout', {
+            method: 'POST'
+        });
+        
+        // 清除显示的用户信息
+        document.getElementById('userSection').style.display = 'none';
+        document.getElementById('loginLink').style.display = 'block';
+        document.getElementById('registerLink').style.display = 'block';
+        
+        // 重新加载文件列表
+        loadFileList();
+    } catch (error) {
+        console.error('登出时出错:', error);
+    }
+}
+
+// 加载文件列表
+async function loadFileList() {
+    try {
+        const response = await fetch('/files');
+        const files = await response.json();
+        displayFileList(files);
+    } catch (error) {
+        console.error('加载文件列表时出错:', error);
+        document.getElementById('fileList').innerHTML = '<li class="file-item">加载文件列表失败</li>';
+    }
+}
+
+// 显示文件列表
+function displayFileList(files) {
+    const fileListEl = document.getElementById('fileList');
+    const username = getCookie('username');
+    const role = getCookie('role');
+    
+    if (!files.length) {
+        fileListEl.innerHTML = '<li class="file-item">暂无文件</li>';
+        return;
+    }
+    
+    fileListEl.innerHTML = files.map(file => {
+        const isOwner = file.uploader === username;
+        const isAdmin = role === 'admin';
+        const canDelete = isOwner || isAdmin;
+        
+        const uploadTime = new Date(file.uploadTime).toLocaleString('zh-CN');
+        const fileSize = file.torrentMeta?.prettyTotalSize || '未知';
+        const infoHash = file.torrentMeta?.infoHash || '未知';
+        
+        return `
+            <li class="file-item">
+                <div class="file-info">
+                    <h3><a href="detail.html?file=${encodeURIComponent(file.savedName)}" class="link">${file.originalName}</a></h3>
+                    <div class="file-meta">
+                        上传者: ${file.uploader} | 
+                        大小: ${fileSize} | 
+                        时间: ${uploadTime} | 
+                        Hash: ${infoHash.substring(0, 8)}...
+                    </div>
+                </div>
+                <div class="file-actions">
+                    <a href="detail.html?file=${encodeURIComponent(file.savedName)}" class="btn">详情</a>
+                    ${canDelete ? `<button class="btn btn-danger" onclick="deleteFile('${file.savedName}')">删除</button>` : ''}
+                </div>
+            </li>
+        `;
+    }).join('');
+}
+
+// 过滤文件列表
+function filterFileList(searchTerm) {
+    const fileItems = document.querySelectorAll('.file-item');
+    searchTerm = searchTerm.toLowerCase();
+    
+    fileItems.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+    });
+}
+
+// 删除文件
+async function deleteFile(savedName) {
+    if (!confirm('确定要删除这个文件吗？')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ savedName })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            loadFileList();
+        } else {
+            alert(`删除失败: ${data.message}`);
+        }
+    } catch (error) {
+        console.error('删除文件时出错:', error);
+        alert('删除文件时发生错误');
+    }
+}
