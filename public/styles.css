@@ -210,6 +210,9 @@ body {
   padding: 15px;
   border-radius: 4px;
   margin-bottom: 10px;
+  overflow-wrap: break-word; /* 允许在单词内换行 */
+  word-break: break-all;     /* 允许在任意字符间断行 */
+  max-width: 100%;           /* 确保不超过容器宽度 */
 }
 
 .detail-info p {
