@@ -14,19 +14,19 @@ document.addEventListener('DOMContentLoaded', function() {
 // 检查登录状态
 async function checkLoginStatus() {
     try {
-        // 这里我们模拟检查cookie
         const username = getCookie('username');
         const role = getCookie('role');
         
         if (username) {
             document.getElementById('userSection').style.display = 'flex';
             document.getElementById('usernameDisplay').textContent = `欢迎, ${username}${role === 'admin' ? ' (管理员)' : ''}`;
-            document.getElementById('loginLink').style.display = 'none';
-            document.getElementById('registerLink').style.display = 'none';
+            // 彻底移除登录/注册按钮
+            const loginElem = document.getElementById("loginLink");
+            if (loginElem) loginElem.parentElement.remove();
+            const registerElem = document.getElementById("registerLink");
+            if (registerElem) registerElem.parentElement.remove();
         } else {
             document.getElementById('userSection').style.display = 'none';
-            document.getElementById('loginLink').style.display = 'block';
-            document.getElementById('registerLink').style.display = 'block';
         }
     } catch (error) {
         console.error('检查登录状态时出错:', error);
@@ -61,11 +61,34 @@ async function handleLogout() {
         await fetch('/logout', {
             method: 'POST'
         });
-        
-        // 清除显示的用户信息
+
+        // 隐藏用户区域
         document.getElementById('userSection').style.display = 'none';
-        document.getElementById('loginLink').style.display = 'block';
-        document.getElementById('registerLink').style.display = 'block';
+
+        // 如果登录/注册按钮已被移除，则动态添加回来
+        const navbarNav = document.querySelector('.navbar-nav');
+        if (!document.getElementById('loginLink')) {
+            const loginLi = document.createElement('li');
+            loginLi.className = 'nav-item';
+            const loginA = document.createElement('a');
+            loginA.href = 'login.html';
+            loginA.className = 'nav-link';
+            loginA.id = 'loginLink';
+            loginA.textContent = '登录';
+            loginLi.appendChild(loginA);
+            navbarNav.insertBefore(loginLi, navbarNav.firstElementChild.nextElementSibling);
+        }
+        if (!document.getElementById('registerLink')) {
+            const registerLi = document.createElement('li');
+            registerLi.className = 'nav-item';
+            const registerA = document.createElement('a');
+            registerA.href = 'register.html';
+            registerA.className = 'nav-link';
+            registerA.id = 'registerLink';
+            registerA.textContent = '注册';
+            registerLi.appendChild(registerA);
+            navbarNav.insertBefore(registerLi, navbarNav.firstElementChild.nextElementSibling.nextElementSibling);
+        }
     } catch (error) {
         console.error('登出时出错:', error);
     }
