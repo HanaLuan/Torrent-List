@@ -1,3 +1,6 @@
+// 新增全局变量：存储当前文件详情（用于下载时获取originalName）
+let currentFile = null;
+
 // 获取URL参数
 function getUrlParameter(name) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -94,23 +97,23 @@ async function handleLogout() {
     }
 }
 
-// 处理下载
+// 修改下载逻辑：使用currentFile中的originalName作为下载文件名
 function handleDownload() {
-    const savedName = getUrlParameter('file');
-    if (savedName) {
-        // 构造下载链接
-        const downloadUrl = `/uploads/${savedName}`;
-        // 创建一个隐藏的a标签来触发下载
+    if (currentFile && currentFile.savedName && currentFile.originalName) {
+        const downloadUrl = `/uploads/${encodeURIComponent(currentFile.savedName)}`;
         const a = document.createElement('a');
         a.href = downloadUrl;
-        a.download = savedName; // 使用原始文件名
+        // 关键修改：先编码再解码，还原特殊字符
+        a.download = decodeURIComponent(encodeURIComponent(currentFile.originalName));
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+    } else {
+        alert('文件信息加载失败，无法下载');
     }
 }
 
-// 加载文件详情
+// 加载文件详情时，保存文件信息到全局变量currentFile
 async function loadFileDetail() {
     const savedName = getUrlParameter('file');
     const detailEl = document.getElementById('fileDetail');
@@ -125,6 +128,7 @@ async function loadFileDetail() {
         const data = await response.json();
         
         if (data.success) {
+            currentFile = data.file; // 保存文件详情到全局变量
             displayFileDetail(data.file);
         } else {
             detailEl.innerHTML = `<div class="alert alert-error">${data.message}</div>`;

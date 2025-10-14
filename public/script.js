@@ -174,13 +174,22 @@ function loadFiles() {
                     const fileActions = document.createElement("div");
                     fileActions.className = "file-actions";
                     
-                    // 下载按钮
+                    // 下载按钮逻辑（修改部分）
                     const downloadBtn = document.createElement("button");
                     downloadBtn.className = "btn";
                     downloadBtn.textContent = "下载";
+                    // 在loadFiles()函数的下载按钮点击事件中
                     downloadBtn.onclick = () => {
-                        window.open(`/uploads/${encodeURIComponent(f.savedName)}`, "_blank");
+                        const downloadUrl = `/uploads/${encodeURIComponent(f.savedName)}`;
+                        const a = document.createElement("a");
+                        a.href = downloadUrl;
+                        // 关键修改：先编码再解码
+                        a.download = decodeURIComponent(encodeURIComponent(f.originalName));
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
                     };
+                    
                     fileActions.appendChild(downloadBtn);
 
                     // 删除按钮（仅上传者或管理员可见）
