@@ -209,9 +209,16 @@ app.get("/files", async (req, res) => {
   try {
     // 查询所有文件，过滤本地已删除的文件
     const filesRes = await pool.query("SELECT * FROM files ORDER BY upload_time DESC");
-    const files = filesRes.rows.filter(f => 
-      fs.existsSync(`uploads/${f.saved_name}`)
-    );
+
+    // 改用异步方法，并添加错误处理
+    const files = [];
+    for (const f of filesRes.rows) {
+      try {
+        await fs.promises.access(`uploads/${f.saved_name}`);
+        files.push(f);
+      } catch { /* 文件不存在，跳过 */ }
+    }
+
     // 转换字段为驼峰命名（适配前端）
     const formattedFiles = files.map(f => ({
       savedName: f.saved_name,
