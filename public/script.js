@@ -9,6 +9,8 @@ const registerBtn = document.getElementById("registerLink");
 const logoutBtn = document.getElementById("logoutBtn");
 const userSection = document.getElementById("userSection");
 const usernameDisplay = document.getElementById("usernameDisplay");
+// 新增：获取管理员面板链接元素
+const adminPanelItem = document.getElementById("adminPanelItem");
 
 // ---------- 上传文件类型校验 ----------
 const allowedExtensions = [".torrent"];
@@ -31,115 +33,141 @@ function checkLoginStatus() {
         currentUser = username;
         currentRole = role || "user";
         
-        // 显示用户区域，隐藏登录/注册链接
-        userSection.style.display = "flex";
-        loginBtn.parentElement.style.display = "none";
-        registerBtn.parentElement.style.display = "none";
+        // 显示用户区域，隐藏登录/注册链接（仅在元素存在时操作）
+        if (userSection) userSection.style.display = "flex";
+        if (loginBtn && loginBtn.parentElement) loginBtn.parentElement.style.display = "none";
+        if (registerBtn && registerBtn.parentElement) registerBtn.parentElement.style.display = "none";
         
-        // 设置用户名显示
-        usernameDisplay.textContent = `欢迎, ${username}${role === "admin" ? " (管理员)" : ""}`;
+        // 设置用户名显示（区分管理员）
+        if (usernameDisplay) {
+            usernameDisplay.textContent = `欢迎, ${username}${role === "admin" ? " (管理员)" : ""}`;
+        }
         
-        // 显示上传表单
-        uploadForm.style.display = "block";
+        // 显示上传表单（仅在元素存在时操作）
+        if (uploadForm) uploadForm.style.display = "block";
         if (progressContainer) progressContainer.style.display = "block";
+
+        // 管理员显示面板链接，普通用户隐藏（仅在元素存在时操作）
+        if (role === "admin" && adminPanelItem) {
+            adminPanelItem.style.display = "block";
+        } else if (adminPanelItem) {
+            adminPanelItem.style.display = "none";
+        }
     } else {
         currentUser = null;
         currentRole = null;
         
-        // 隐藏用户区域，显示登录/注册链接
-        userSection.style.display = "none";
-        loginBtn.parentElement.style.display = "block";
-        registerBtn.parentElement.style.display = "block";
+        // 隐藏用户区域，显示登录/注册链接（仅在元素存在时操作）
+        if (userSection) userSection.style.display = "none";
+        if (loginBtn && loginBtn.parentElement) loginBtn.parentElement.style.display = "block";
+        if (registerBtn && registerBtn.parentElement) registerBtn.parentElement.style.display = "block";
         
-        // 隐藏上传表单
-        uploadForm.style.display = "none";
+        // 隐藏上传表单和管理员面板链接（仅在元素存在时操作）
+        if (uploadForm) uploadForm.style.display = "none";
         if (progressContainer) progressContainer.style.display = "none";
+        if (adminPanelItem) adminPanelItem.style.display = "none";
     }
-    loadFiles();
+    // 仅在文件列表元素存在时加载文件（避免管理员面板等页面报错）
+    if (fileList) loadFiles();
 }
 
 // ---------- 登出 ----------
-logoutBtn.onclick = () => {
-    fetch("/logout", { method: "POST" }).then(() => {
-        checkLoginStatus();
-    });
-};
+// 关键修复：仅在登出按钮存在时绑定事件，避免在无此元素的页面报错
+if (logoutBtn) {
+    logoutBtn.onclick = () => {
+        fetch("/logout", { method: "POST" }).then(() => {
+            checkLoginStatus(); // 登出后重新检查状态，自动隐藏管理员链接
+        });
+    };
+}
 
 // ---------- 文件选择校验 ----------
-fileInput.addEventListener("change", () => {
-    const file = fileInput.files[0];
-    if (!file) return;
-    const ext = "." + file.name.split(".").pop().toLowerCase();
-    if (!allowedExtensions.includes(ext)) {
-        alert(`不允许的文件类型: ${ext}`);
-        fileInput.value = "";
-    }
-});
+// 仅在文件输入框存在时绑定事件
+if (fileInput) {
+    fileInput.addEventListener("change", () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        const ext = "." + file.name.split(".").pop().toLowerCase();
+        if (!allowedExtensions.includes(ext)) {
+            alert(`不允许的文件类型: ${ext}`);
+            fileInput.value = "";
+        }
+    });
+}
 
 // ---------- 上传 ----------
-uploadForm.onsubmit = e => {
-    e.preventDefault();
-    if (!currentUser) {
-        alert("请先登录");
-        return;
-    }
-    
-    const file = fileInput.files[0];
-    if (!file) return;
-
-    // 禁用提交按钮
-    const submitBtn = uploadForm.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-
-    const formData = new FormData();
-    formData.append("arquivo", file);
-
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "/upload", true);
-    
-    xhr.upload.onprogress = evt => {
-        if (evt.lengthComputable) {
-            const pct = Math.round((evt.loaded / evt.total) * 100);
-            progressBar.style.width = pct + "%";
-            status.textContent = `上传中: ${pct}%`;
+// 仅在上传表单存在时绑定事件
+if (uploadForm) {
+    uploadForm.onsubmit = e => {
+        e.preventDefault();
+        if (!currentUser) {
+            alert("请先登录");
+            return;
         }
-    };
-    
-    xhr.onload = () => {
-        submitBtn.disabled = false;
-        if (xhr.status === 200) {
-            status.textContent = "上传成功!";
-            progressBar.style.width = "100%";
-            loadFiles();
-            setTimeout(() => {
-                progressBar.style.width = "0%";
-                status.textContent = "";
-                fileInput.value = "";
-            }, 1000);
-        } else {
-            status.textContent = "上传失败";
-            setTimeout(() => {
-                progressBar.style.width = "0%";
-            }, 1000);
-        }
-    };
+        
+        const file = fileInput.files[0];
+        if (!file) return;
 
-    xhr.onerror = () => {
-        status.textContent = "上传失败";
-        submitBtn.disabled = false;
-        setTimeout(() => {
-            progressBar.style.width = "0%";
-        }, 1000);
+        // 禁用提交按钮
+        const submitBtn = uploadForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append("arquivo", file);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/upload", true);
+        
+        xhr.upload.onprogress = evt => {
+            if (evt.lengthComputable) {
+                const pct = Math.round((evt.loaded / evt.total) * 100);
+                if (progressBar) progressBar.style.width = pct + "%";
+                if (status) status.textContent = `上传中: ${pct}%`;
+            }
+        };
+        
+        xhr.onload = () => {
+            if (submitBtn) submitBtn.disabled = false;
+            if (xhr.status === 200) {
+                const data = JSON.parse(xhr.responseText);
+                if (data.success) {
+                    if (status) status.textContent = "上传成功!";
+                    if (progressBar) progressBar.style.width = "100%";
+                    if (fileList) loadFiles();
+                    setTimeout(() => {
+                        if (progressBar) progressBar.style.width = "0%";
+                        if (status) status.textContent = "";
+                        if (fileInput) fileInput.value = "";
+                    }, 1000);
+                } else {
+                    if (status) status.textContent = `上传失败: ${data.message || "未知错误"}`;
+                }
+            } else {
+                if (status) status.textContent = `上传失败 (${xhr.status}): 服务器错误`;
+            }
+            setTimeout(() => {
+                if (progressBar) progressBar.style.width = "0%";
+            }, 1000);
+        };
+
+        xhr.onerror = () => {
+            if (status) status.textContent = "上传失败: 网络错误";
+            if (submitBtn) submitBtn.disabled = false;
+            setTimeout(() => {
+                if (progressBar) progressBar.style.width = "0%";
+            }, 1000);
+        };
+        
+        xhr.send(formData);
     };
-    
-    xhr.send(formData);
-};
+}
 
 // ---------- 获取文件列表 ----------
 function loadFiles() {
     fetch("/files")
         .then(res => res.json())
         .then(files => {
+            if (!fileList) return; // 若文件列表元素不存在，直接返回
             const searchValue = searchInput ? searchInput.value.trim().toLowerCase() : "";
             fileList.innerHTML = "";
 
@@ -174,17 +202,15 @@ function loadFiles() {
                     const fileActions = document.createElement("div");
                     fileActions.className = "file-actions";
                     
-                    // 下载按钮逻辑（修改部分）
+                    // 下载按钮
                     const downloadBtn = document.createElement("button");
                     downloadBtn.className = "btn";
                     downloadBtn.textContent = "下载";
-                    // 在loadFiles()函数的下载按钮点击事件中
                     downloadBtn.onclick = () => {
                         const downloadUrl = `/uploads/${encodeURIComponent(f.savedName)}`;
                         const a = document.createElement("a");
                         a.href = downloadUrl;
-                        // 关键修改：先编码再解码
-                        a.download = decodeURIComponent(encodeURIComponent(f.originalName));
+                        a.download = decodeURIComponent(encodeURIComponent(f.originalName)); // 处理特殊字符
                         document.body.appendChild(a);
                         a.click();
                         document.body.removeChild(a);
@@ -206,8 +232,8 @@ function loadFiles() {
                                 })
                                 .then(res => res.json())
                                 .then(data => {
-                                    if (data.success) loadFiles();
-                                    else alert(data.message);
+                                    if (data.success && fileList) loadFiles();
+                                    else alert(data.message || "删除失败");
                                 });
                             }
                         };
@@ -217,6 +243,20 @@ function loadFiles() {
                     li.appendChild(fileActions);
                     fileList.appendChild(li);
                 });
+
+            // 空列表提示
+            if (fileList.children.length === 0) {
+                const emptyLi = document.createElement("li");
+                emptyLi.className = "file-item empty";
+                emptyLi.textContent = "未找到匹配的文件";
+                fileList.appendChild(emptyLi);
+            }
+        })
+        .catch(err => {
+            console.error("加载文件列表失败:", err);
+            if (fileList) {
+                fileList.innerHTML = '<li class="file-item empty">加载文件失败，请刷新页面</li>';
+            }
         });
 }
 
@@ -228,5 +268,4 @@ if (searchInput) {
 // ---------- 页面初始状态 ----------
 document.addEventListener("DOMContentLoaded", () => {
     checkLoginStatus();
-    loadFiles();
 });

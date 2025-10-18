@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理员面板 - Torrent-list</title>
+  <link rel="stylesheet" href="admin-panel.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>管理员面板</h1>
+    </div>
+
+    <!-- 系统概览 -->
+    <div class="section">
+      <h2>系统概览</h2>
+      <div class="stats">
+        <div class="stat-card">
+          <div class="label">用户总数</div>
+          <div class="value" id="userCount">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">文件总数</div>
+          <div class="value" id="fileCount">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">文件总大小</div>
+          <div class="value" id="totalSize">--</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 用户管理 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>用户管理</h2>
+        <button class="btn btn-primary" id="addUserBtn">新增用户</button>
+      </div>
+
+      <!-- 搜索框 -->
+    <div class="search-bar">
+    <input type="text" id="userSearch" class="search-input" placeholder="搜索用户名/角色...">
+    </div>
+
+      <!-- 用户列表 -->
+      <div class="table-container">
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>用户名</th>
+              <th>角色</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody">
+            <tr><td colspan="3" style="text-align: center;">加载中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <a href="/" class="back-link nav-link">← 返回首页</a>
+  </div>
+
+  <!-- 新增/编辑用户模态框 -->
+  <div class="modal-mask" id="userModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">新增用户</div>
+        <div class="modal-close" id="modalClose">×</div>
+      </div>
+      <form id="userForm">
+        <input type="hidden" id="formType" value="add">
+        <input type="hidden" id="currentUsername">
+        
+        <div class="form-group">
+          <label for="username">用户名 <span class="required">*</span></label>
+          <input type="text" id="username" name="username" class="form-control" required placeholder="请输入用户名">
+        </div>
+
+        <div class="form-group" id="passwordGroup">
+          <label for="password">密码 <span class="required">*</span></label>
+          <input type="password" id="password" name="password" class="form-control" required minlength="6" placeholder="请输入6位以上密码">
+        </div>
+
+        <div class="form-group">
+          <label for="role">角色 <span class="required">*</span></label>
+          <select id="role" name="role" class="form-select" required>
+            <option value="user">普通用户</option>
+            <option value="admin">管理员</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">提交</button>
+        <div class="message" id="formMessage"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 修改密码模态框 -->
+  <div class="modal-mask" id="pwdModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">修改用户密码</div>
+        <div class="modal-close" id="pwdModalClose">×</div>
+      </div>
+      <form id="pwdForm">
+        <input type="hidden" id="pwdUsername">
+        
+        <div class="form-group">
+          <label for="newPwd">新密码 <span class="required">*</span></label>
+          <input type="password" id="newPwd" class="form-control" required minlength="6" placeholder="请输入6位以上新密码">
+        </div>
+
+        <div class="form-group">
+          <label for="newPwdConfirm">确认新密码 <span class="required">*</span></label>
+          <input type="password" id="newPwdConfirm" class="form-control" required minlength="6" placeholder="再次输入新密码">
+        </div>
+
+        <button type="submit" class="btn btn-primary">确认修改</button>
+        <div class="message" id="pwdMessage"></div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script> <!-- 复用基础工具函数 -->
+  <script src="admin-panel.js"></script>
+</body>
+</html>
