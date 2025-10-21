@@ -1,5 +1,7 @@
 # Torrent-list
 
+[English](./Docs/readme_en.md) | [中文](./README.md)| [繁体中文](./Docs/readme_tcn.md)  
+
 感谢你找到了这个小项目😊（嘿嘿）
 
 这是一个基于 Express.js + PostgreSQL 的磁力种子存储站
