@@ -13,10 +13,6 @@ This is a magnet torrent storage station based on Express.js + PostgreSQL.
 
 A special thanks to [yang杨](https://github.com/yang1145) for the careful optimization of the front-end interface of this project! Your contribution has made the interface more beautiful and user-friendly.
 
-
-## Official Website (new version update is temporarily suspended due to some reasons): [Come back later~](https://wap-ac.ybmq.dpdns.org/)
-
-
 ## Features
 
 ### User System
