@@ -145,10 +145,6 @@ body {
   color: var(--primary-color);
 }
 
-#profileLink {
-  margin-right: 20px;
-}
-
 /* 消息提示 */
 .alert {
   padding: 15px;
