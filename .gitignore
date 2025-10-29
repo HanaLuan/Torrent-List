@@ -144,3 +144,5 @@ vite.config.ts.timestamp-*
 
 # 忽略根目录的 uploads 文件夹
 /uploads/
+
+.vscode/
