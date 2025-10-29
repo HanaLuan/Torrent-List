@@ -14,11 +14,10 @@
         <li class="nav-item">
           <a href="index.html" class="nav-link">首页</a>
         </li>
-        <li class="nav-item">
-          <a href="login.html" class="nav-link">登录</a>
-        </li>
-        <li class="nav-item">
-          <a href="register.html" class="nav-link">注册</a>
+        <li class="nav-item" id="userSection" style="display: none;">
+          <a href="profile.html" id="profileLink" class="nav-link">个人中心</a>
+          <span id="usernameDisplay"></span>
+          <button id="logoutBtn" class="btn btn-secondary" style="margin-left: 10px; padding: 5px 10px;">登出</button>
         </li>
       </ul>
     </div>
@@ -49,6 +48,20 @@
   </div>
 
   <script>
+    // 检查用户是否已经登录
+    document.addEventListener('DOMContentLoaded', function() {
+      const username = getCookie('username');
+      if (username) {
+        window.location.href = 'index.html';
+      }
+    });
+
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
     document.getElementById('registerForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
