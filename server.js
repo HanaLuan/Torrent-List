@@ -133,6 +133,53 @@ app.post("/logout", (req, res) => {
   res.json({ success: true });
 });
 
+// 修改密码
+app.post("/change-password", async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const username = req.cookies.username;
+  
+  if (!username) {
+    return res.status(403).json({ success: false, message: "请先登录" });
+  }
+  
+  if (!oldPassword || !newPassword) {
+    return res.status(400).json({ success: false, message: "参数不完整" });
+  }
+  
+  try {
+    // 查询用户
+    const userRes = await pool.query(
+      "SELECT * FROM users WHERE username = $1",
+      [username]
+    );
+    
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "用户不存在" });
+    }
+    
+    const user = userRes.rows[0];
+    
+    // 验证旧密码
+    if (!bcrypt.compareSync(oldPassword, user.password)) {
+      return res.status(400).json({ success: false, message: "原密码错误" });
+    }
+    
+    // 加密新密码
+    const hashedNewPwd = bcrypt.hashSync(newPassword, 10);
+    
+    // 更新密码
+    await pool.query(
+      "UPDATE users SET password = $1 WHERE username = $2",
+      [hashedNewPwd, username]
+    );
+    
+    res.json({ success: true, message: "密码修改成功" });
+  } catch (err) {
+    console.error("修改密码失败:", err);
+    res.status(500).json({ success: false, message: "服务器错误" });
+  }
+});
+
 // ===== 文件相关接口 =====
 // 上传文件
 app.post("/upload", upload.single("arquivo"), async (req, res, next) => {
