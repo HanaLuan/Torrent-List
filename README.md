@@ -1,3 +1,5 @@
+# 私了私了，等删库或者重构罢，写个danm。
+
 # Torrent-list
 
 [English](./Docs/readme_en.md) | [中文](./README.md)| [繁体中文](./Docs/readme_tcn.md)  
